@@ -125,12 +125,14 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
 		OnDateSetListener dateSetListener = new OnDateSetListener() {			
 			@Override
 			public void onDateSet(DatePicker view, int year, int monthOfYear,
-					int dayOfMonth) {			
-				input.setText(dateFormat.format(defaultDate.getTime()));
+					int dayOfMonth) {
+				Calendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth);
+				input.setText(dateFormat.format(calendar.getTime()));
 			}
 		};
+
 		final DatePickerDialog datePicker = new DatePickerDialog(this, dateSetListener, defaultDate.get(Calendar.YEAR), defaultDate.get(Calendar.MONTH), defaultDate.get(Calendar.DAY_OF_MONTH));
-		input.setText(formatDate(new GregorianCalendar()));
+		input.setText(formatDate(defaultDate));
 		OnTouchListener listener = new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -147,7 +149,7 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
 	
     private <T> void populateSpinner(Spinner spinner, List<T> objects) {
     	ArrayAdapter<T> adapter = new ArrayAdapter<T>(this, android.R.layout.simple_spinner_dropdown_item, objects);
-    	adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    	adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
     	spinner.setAdapter(adapter);
     }
     

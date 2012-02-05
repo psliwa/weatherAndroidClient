@@ -11,7 +11,8 @@
 	<Spinner 
 	    android:id="@+id/cityInput"
 	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content" />
+	    android:layout_height="wrap_content"
+	    android:drawSelectorOnTop="false"  />
 
 	<TableLayout 
 	    android:stretchColumns="0,1"
