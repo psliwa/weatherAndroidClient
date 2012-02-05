@@ -13,8 +13,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import pk.ip.weather.android.api.service.ApiException;
 import pk.ip.weather.android.api.service.ApiService;
-import pk.ip.weather.android.api.service.StubApiService;
+import pk.ip.weather.android.api.service.ApiServiceImpl;
 import pk.ip.weather.android.dao.InMemoryDao;
 import pk.ip.weather.android.domain.City;
 import pk.ip.weather.android.domain.GraphGrouping;
@@ -24,12 +25,20 @@ import pk.ip.weather.android.service.WeatherServiceImpl;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.ArrayAdapter;
@@ -40,10 +49,15 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class WeatherActivity extends Activity {
+public class WeatherActivity extends Activity implements OnSharedPreferenceChangeListener {
 	
 	private static final String TAG = "WeaterActivity";
 	private static final String DATE_FORMAT = "dd/MM/yyyy";
+	private static final String PREFS_KEY_API_URL = "prefApiUrl";
+	
+	private SharedPreferences prefs;
+	
+	private DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 	
 	private Spinner citySpinner;
 	private Spinner typeSpinner;
@@ -62,6 +76,7 @@ public class WeatherActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather);
         
+        loadPrefs();
         viewProcess();
     }
     
@@ -81,6 +96,21 @@ public class WeatherActivity extends Activity {
     	attachListeners();
     }
     
+    private void loadPrefs() {
+    	prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    	
+		prefs.registerOnSharedPreferenceChangeListener(this);
+    }
+
+	@Override
+	public synchronized void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+		Log.d(TAG, "onSharedPreferenceChanged: "+key);
+		if(key.equals(PREFS_KEY_API_URL)) {
+			apiService = null;
+			weatherService = null;
+		}
+	}
+    
 	private void assignWidgets() {
 		citySpinner = (Spinner) findViewById(R.id.cityInput);
     	typeSpinner = (Spinner) findViewById(R.id.typeInput);
@@ -91,33 +121,28 @@ public class WeatherActivity extends Activity {
     	graphContainer = (ImageView) findViewById(R.id.graphContainer);
 	}
 	
-	private void attachDatePicker(final EditText input, final Calendar defaultDate) {		
-		final DatePickerDialog datePicker = new DatePickerDialog(this, new OnDateSetListener() {			
+	private void attachDatePicker(final EditText input, final Calendar defaultDate) {
+		OnDateSetListener dateSetListener = new OnDateSetListener() {			
 			@Override
 			public void onDateSet(DatePicker view, int year, int monthOfYear,
-					int dayOfMonth) {
-				Calendar calendar = new GregorianCalendar();
-				calendar.set(Calendar.YEAR, year);
-				calendar.set(Calendar.MONTH, monthOfYear);
-				calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-				
-				DateFormat format = new SimpleDateFormat(DATE_FORMAT);
-				input.setText(format.format(calendar.getTime()));
+					int dayOfMonth) {			
+				input.setText(dateFormat.format(defaultDate.getTime()));
 			}
-		}, defaultDate.get(Calendar.YEAR), defaultDate.get(Calendar.MONTH), defaultDate.get(Calendar.DAY_OF_MONTH));
+		};
+		final DatePickerDialog datePicker = new DatePickerDialog(this, dateSetListener, defaultDate.get(Calendar.YEAR), defaultDate.get(Calendar.MONTH), defaultDate.get(Calendar.DAY_OF_MONTH));
 		input.setText(formatDate(new GregorianCalendar()));
-		input.setOnTouchListener(new OnTouchListener() {
+		OnTouchListener listener = new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				datePicker.show();	
 				return false;
 			}
-		});
+		};
+		input.setOnTouchListener(listener);
 	}
 	
 	private String formatDate(Calendar calendar) {
-		DateFormat format = new SimpleDateFormat(DATE_FORMAT);
-		return format.format(calendar.getTime());
+		return dateFormat.format(calendar.getTime());
 	}
 	
     private <T> void populateSpinner(Spinner spinner, List<T> objects) {
@@ -160,7 +185,9 @@ public class WeatherActivity extends Activity {
     
     private ApiService getApiService() {
     	if(apiService == null) {
-    		apiService = new StubApiService("");
+    		String apiUrl = prefs.getString(PREFS_KEY_API_URL, "");
+    		apiService = new ApiServiceImpl(apiUrl);
+    		Log.d(TAG, "Utworzono obiekt apiService, apiUrl: "+apiUrl);
     	}
     	
     	return apiService;
@@ -188,6 +215,9 @@ public class WeatherActivity extends Activity {
 								is = getApiService().getGraphURL(dateFrom, dateTo, city, graphType, graphGrouping).openStream();
 								drawable = Drawable.createFromStream(is, "image");
 							} catch (IOException e) {
+								//TODO: komunikat
+								Log.e(TAG, "Error", e);
+							} catch (ApiException e) {
 								//TODO: komunikat
 								Log.e(TAG, "Error", e);
 							} finally {
@@ -227,5 +257,22 @@ public class WeatherActivity extends Activity {
 		} catch (ParseException e) {
 			throw new ValidationException("Date format is invalid", e);
 		}
+    }
+    
+    public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu, menu);
+		
+		MenuItem prefsItem = menu.findItem(R.id.menuPrefs);
+		
+		prefsItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				startActivity(new Intent(WeatherActivity.this, PrefsActivity.class));
+				return false;
+			}
+		});
+    	
+    	return true;
     }
 }

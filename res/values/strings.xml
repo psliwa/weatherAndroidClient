@@ -6,5 +6,8 @@
     <string name="hintDateFrom">Date from</string>
     <string name="hintDateTo">Date to</string>
     <string name="titleShow">show</string>
+    <string name="titlePrefApiUrl">Api url</string>
+    <string name="summaryPrefApiUrl">Url to api of service</string>
+    <string name="titlePrefs">Preferences</string>
 
 </resources>

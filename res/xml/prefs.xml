@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <EditTextPreference 
+        android:key="prefApiUrl" 
+        android:summary="@string/summaryPrefApiUrl" 
+        android:title="@string/titlePrefApiUrl" 
+        android:defaultValue="http://192.168.9.246/weatherApiService/public/index.php"
+    />
+    
+
+</PreferenceScreen>
