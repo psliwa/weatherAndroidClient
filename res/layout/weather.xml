@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+    
+	<LinearLayout
+    	android:focusable="true" android:focusableInTouchMode="true"
+    	android:layout_width="0px" android:layout_height="0px"/>
+
+	<Spinner 
+	    android:id="@+id/cityInput"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content" />
+
+	<TableLayout 
+	    android:stretchColumns="0,1"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content">
+	    <TableRow
+	        android:layout_width="fill_parent">
+			<EditText 
+			    android:id="@+id/dateFromInput"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:inputType="date"
+			    android:hint="@string/hintDateFrom"/>
+			<EditText 
+			    android:id="@+id/dateToInput"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:inputType="date"
+			    android:hint="@string/hintDateTo"/>
+	    </TableRow>
+	    <TableRow
+	        android:layout_width="fill_parent">
+			<Spinner 
+			    android:id="@+id/typeInput"
+	    		android:layout_width="fill_parent"
+	    		android:layout_height="wrap_content"
+			    />
+			<Spinner 
+			    android:id="@+id/groupInput"
+	    		android:layout_width="fill_parent"
+	    		android:layout_height="wrap_content"
+			    />
+		</TableRow>	  
+		<Button 
+		    android:id="@+id/showButton"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:text="@string/titleShow"/>  
+	</TableLayout>
+	
+	
+	
+</LinearLayout>
