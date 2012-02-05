@@ -17,6 +17,7 @@ public final class R {
         public static final int cityInput=0x7f050000;
         public static final int dateFromInput=0x7f050001;
         public static final int dateToInput=0x7f050002;
+        public static final int graphContainer=0x7f050006;
         public static final int groupInput=0x7f050004;
         public static final int showButton=0x7f050005;
         public static final int typeInput=0x7f050003;

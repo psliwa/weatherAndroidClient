@@ -45,13 +45,19 @@
 	    		android:layout_height="wrap_content"
 			    />
 		</TableRow>	  
-		<Button 
-		    android:id="@+id/showButton"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:text="@string/titleShow"/>  
 	</TableLayout>
 	
-	
+	<Button 
+	    android:id="@+id/showButton"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:text="@string/titleShow"/>  
+	    
+	<ImageView 
+	    android:id="@+id/graphContainer"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"
+	    />
 	
 </LinearLayout>

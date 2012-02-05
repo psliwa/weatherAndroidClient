@@ -1,6 +1,9 @@
 package pk.ip.weather.android.api.service;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import pk.ip.weather.android.domain.City;
@@ -55,5 +58,16 @@ public class StubApiService implements ApiService {
 		grouping.setName(name);
 		
 		return grouping;
+	}
+
+	@Override
+	public URL getGraphURL(Date dateFrom, Date dateTo, City city,
+			GraphType type, GraphGrouping grouping) {
+
+		try {
+			return new URL("http://blog.browsermob.com/wp-content/uploads/2008/11/zoomed-chart.png");
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

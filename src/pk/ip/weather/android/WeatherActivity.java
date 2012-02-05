@@ -1,6 +1,9 @@
 package pk.ip.weather.android;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -10,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import pk.ip.weather.android.api.service.ApiService;
 import pk.ip.weather.android.api.service.StubApiService;
 import pk.ip.weather.android.dao.InMemoryDao;
 import pk.ip.weather.android.domain.City;
@@ -20,20 +24,26 @@ import pk.ip.weather.android.service.WeatherServiceImpl;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 public class WeatherActivity extends Activity {
 	
 	private static final String TAG = "WeaterActivity";
+	private static final String DATE_FORMAT = "dd/MM/yyyy";
 	
 	private Spinner citySpinner;
 	private Spinner typeSpinner;
@@ -41,8 +51,10 @@ public class WeatherActivity extends Activity {
 	private EditText dateFromInput;
 	private EditText dateToInput;
 	private Button showButton;
+	private ImageView graphContainer;
 	
 	private WeatherService weatherService;
+	private ApiService apiService;
 	
     /** Called when the activity is first created. */
     @Override
@@ -55,12 +67,18 @@ public class WeatherActivity extends Activity {
     
     private void viewProcess() {
     	assignWidgets();
-    	attachDatePicker(dateFromInput);
-    	attachDatePicker(dateToInput);    	
+    	
+    	Calendar defaultFrom = new GregorianCalendar();
+    	defaultFrom.add(Calendar.MONTH, -1);
+
+    	attachDatePicker(dateFromInput, defaultFrom);
+    	attachDatePicker(dateToInput, new GregorianCalendar());    	
     	
     	populateSpinner(citySpinner, getCities());
     	populateSpinner(typeSpinner, getGraphTypes());
     	populateSpinner(groupSpinner, getGraphGroupings());
+    	
+    	attachListeners();
     }
     
 	private void assignWidgets() {
@@ -70,14 +88,10 @@ public class WeatherActivity extends Activity {
     	dateFromInput = (EditText) findViewById(R.id.dateFromInput);
     	dateToInput = (EditText) findViewById(R.id.dateToInput);
     	showButton = (Button) findViewById(R.id.showButton);
+    	graphContainer = (ImageView) findViewById(R.id.graphContainer);
 	}
 	
-	private void attachDatePicker(final EditText input) {
-		Calendar calendar = new GregorianCalendar();
-		Log.d(TAG, Integer.toString(calendar.get(Calendar.YEAR)));
-		Log.d(TAG, Integer.toString(calendar.get(Calendar.MONTH)));
-		Log.d(TAG, Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)));
-		
+	private void attachDatePicker(final EditText input, final Calendar defaultDate) {		
 		final DatePickerDialog datePicker = new DatePickerDialog(this, new OnDateSetListener() {			
 			@Override
 			public void onDateSet(DatePicker view, int year, int monthOfYear,
@@ -87,11 +101,11 @@ public class WeatherActivity extends Activity {
 				calendar.set(Calendar.MONTH, monthOfYear);
 				calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 				
-				DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+				DateFormat format = new SimpleDateFormat(DATE_FORMAT);
 				input.setText(format.format(calendar.getTime()));
 			}
-		}, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
-		
+		}, defaultDate.get(Calendar.YEAR), defaultDate.get(Calendar.MONTH), defaultDate.get(Calendar.DAY_OF_MONTH));
+		input.setText(formatDate(new GregorianCalendar()));
 		input.setOnTouchListener(new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -99,6 +113,11 @@ public class WeatherActivity extends Activity {
 				return false;
 			}
 		});
+	}
+	
+	private String formatDate(Calendar calendar) {
+		DateFormat format = new SimpleDateFormat(DATE_FORMAT);
+		return format.format(calendar.getTime());
 	}
 	
     private <T> void populateSpinner(Spinner spinner, List<T> objects) {
@@ -133,9 +152,80 @@ public class WeatherActivity extends Activity {
     
     private WeatherService getWeatherService() {
     	if(weatherService == null) {
-    		weatherService = new WeatherServiceImpl(new InMemoryDao(), new StubApiService(""));
+    		weatherService = new WeatherServiceImpl(new InMemoryDao(), getApiService());
     	}
     	
     	return weatherService;
+    }
+    
+    private ApiService getApiService() {
+    	if(apiService == null) {
+    		apiService = new StubApiService("");
+    	}
+    	
+    	return apiService;
+    }
+    
+    private void attachListeners() {
+    	showButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				try	{
+					final City city = (City) citySpinner.getSelectedItem();
+					final GraphType graphType = (GraphType) typeSpinner.getSelectedItem();
+					final GraphGrouping graphGrouping = (GraphGrouping) groupSpinner.getSelectedItem();
+					
+					final Date dateFrom = dateFromString(dateFromInput.getText().toString());
+					final Date dateTo = dateFromString(dateToInput.getText().toString());
+					
+					new AsyncTask<String, Integer, Drawable>()
+					{
+						@Override
+						protected Drawable doInBackground(String... arg0) {
+							Drawable drawable = null;
+							InputStream is = null;
+							try {
+								is = getApiService().getGraphURL(dateFrom, dateTo, city, graphType, graphGrouping).openStream();
+								drawable = Drawable.createFromStream(is, "image");
+							} catch (IOException e) {
+								//TODO: komunikat
+								Log.e(TAG, "Error", e);
+							} finally {
+								if(is != null) {
+									try {
+										is.close();
+									} catch (IOException e) {
+										//TODO: komunikat
+										Log.e(TAG, "Error", e);
+									}
+								}
+							}
+							
+							return drawable;
+						}
+						
+						protected void onPostExecute(Drawable drawable) {
+							graphContainer.setImageDrawable(drawable);
+						}
+						
+					}.execute(new String[0]);
+				} catch (ValidationException e) {
+					handleException(e);
+				}
+			}
+		});
+    }
+    
+    private void handleException(Throwable e) {
+    	Toast.makeText(WeatherActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+    
+    private Date dateFromString(String stringDate) {
+    	DateFormat format = new SimpleDateFormat(DATE_FORMAT);
+    	try {
+			return format.parse(stringDate);
+		} catch (ParseException e) {
+			throw new ValidationException("Date format is invalid", e);
+		}
     }
 }
