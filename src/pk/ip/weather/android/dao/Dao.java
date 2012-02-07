@@ -6,6 +6,7 @@ import pk.ip.weather.android.domain.City;
 import pk.ip.weather.android.domain.Graph;
 import pk.ip.weather.android.domain.GraphGrouping;
 import pk.ip.weather.android.domain.GraphType;
+import pk.ip.weather.android.util.ExtraIterator;
 
 public interface Dao {
 	public Set<City> findCities();
@@ -18,5 +19,5 @@ public interface Dao {
 	public void saveGraphGroupings(Set<GraphGrouping> groupings);
 	
 	public void saveGraph(Graph graph);
-	public Iterator<Graph> findGraphs();
+	public ExtraIterator<Graph> findGraphs();
 }

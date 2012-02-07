@@ -20,6 +20,7 @@ public final class R {
         public static final int graphContainer=0x7f070000;
         public static final int groupInput=0x7f070006;
         public static final int listView=0x7f070001;
+        public static final int menuList=0x7f070009;
         public static final int menuPrefs=0x7f070008;
         public static final int showButton=0x7f070007;
         public static final int typeInput=0x7f070005;
@@ -28,7 +29,8 @@ public final class R {
         public static final int dialog=0x7f030000;
         public static final int graph_item=0x7f030001;
         public static final int graph_list=0x7f030002;
-        public static final int weather=0x7f030003;
+        public static final int graph_list_item=0x7f030003;
+        public static final int weather=0x7f030004;
     }
     public static final class menu {
         public static final int menu=0x7f060000;
@@ -43,6 +45,7 @@ public final class R {
         public static final int labelGrouping=0x7f05000b;
         public static final int labelType=0x7f05000a;
         public static final int summaryPrefApiUrl=0x7f050006;
+        public static final int titleList=0x7f05000c;
         public static final int titlePrefApiUrl=0x7f050005;
         public static final int titlePrefs=0x7f050007;
         public static final int titleShow=0x7f050004;

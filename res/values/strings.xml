@@ -13,5 +13,6 @@
     <string name="labelDateTo">Date to</string>
     <string name="labelType">Type</string>
     <string name="labelGrouping">Grouping</string>
+    <string name="titleList">List</string>
 
 </resources>

@@ -42,6 +42,16 @@ public class AbstractActivity extends Activity {
 				return false;
 			}
 		});
+		
+		MenuItem listItem = menu.findItem(R.id.menuList);
+		
+		listItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(MenuItem arg0) {
+				startActivity(new Intent(AbstractActivity.this, GraphListActivity.class));
+				return false;
+			}
+		});
     	
     	return true;
     }

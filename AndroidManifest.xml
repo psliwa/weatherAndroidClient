@@ -26,6 +26,8 @@
             android:label="@string/titlePrefs" />
         <activity
             android:name=".GraphItemActivity" />
+        <activity
+            android:name=".GraphListActivity" />
     </application>
 
 </manifest>

@@ -1,16 +1,24 @@
 package pk.ip.weather.android.widget;
 
 import pk.ip.weather.android.util.ExtraIterator;
+import android.content.Context;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
 
 public class ExtraIteratorAdapter extends BaseAdapter {
 
 	private ExtraIterator<? extends Object> iter;
+	private LayoutInflater inflater;
+	private int resource;
 	
-	public ExtraIteratorAdapter(ExtraIterator<? extends Object> iter) {
+	public ExtraIteratorAdapter(Context context, int resource, ExtraIterator<? extends Object> iter) {
 		this.iter = iter;
+		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.resource = resource;
 	}
 	
 	@Override
@@ -21,6 +29,8 @@ public class ExtraIteratorAdapter extends BaseAdapter {
 	@Override
 	public Object getItem(int index) {
 		Object result = null;
+		Log.d("iter", "index: "+index);
+
 		int objectIndex = -1;
 
 		if(iter.hasNext() && index >= iter.nextIndex()) {
@@ -31,7 +41,7 @@ public class ExtraIteratorAdapter extends BaseAdapter {
 		}else if(iter.hasPrevious() && index <= iter.previousIndex()) {
 			while(iter.hasPrevious() && index <= iter.previousIndex()) {
 				objectIndex = iter.previousIndex();
-				result = iter.next();
+				result = iter.previous();
 			}
 		}
 		
@@ -44,9 +54,13 @@ public class ExtraIteratorAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public View getView(int arg0, View arg1, ViewGroup arg2) {
-		// TODO Auto-generated method stub
-		return null;
+	public View getView(int position, View convertView, ViewGroup parent) {
+		if(convertView == null) {
+			convertView = inflater.inflate(resource, parent, false);
+		}
+		
+		((TextView) convertView).setText(getItem(position).toString());
+		
+		return convertView;
 	}
-
 }

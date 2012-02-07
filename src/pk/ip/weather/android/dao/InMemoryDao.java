@@ -5,12 +5,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import pk.ip.weather.android.domain.City;
 import pk.ip.weather.android.domain.Graph;
 import pk.ip.weather.android.domain.GraphGrouping;
 import pk.ip.weather.android.domain.GraphType;
+import pk.ip.weather.android.util.ExtraIterator;
 
 public class InMemoryDao implements Dao {
 
@@ -56,7 +58,72 @@ public class InMemoryDao implements Dao {
 	}
 	
 	@Override
-	public Iterator<Graph> findGraphs() {
-		return graphs.iterator();
+	public ExtraIterator<Graph> findGraphs() {
+		return new ExtraIteratorImpl(graphs.listIterator(), graphs.size());
+	}
+	
+	private static class ExtraIteratorImpl<T> implements ExtraIterator<T> {
+
+		private ListIterator<T> iter;
+		private int count;
+		
+		public ExtraIteratorImpl(ListIterator<T> iter, int count) {
+			this.iter = iter;
+			this.count = count;
+		}
+		
+		@Override
+		public void add(T arg0) {
+
+		}
+
+		@Override
+		public boolean hasNext() {
+			return iter.hasNext();
+		}
+
+		@Override
+		public boolean hasPrevious() {
+			return iter.hasPrevious();
+		}
+
+		@Override
+		public T next() {
+			return iter.next();
+		}
+
+		@Override
+		public int nextIndex() {
+			return iter.nextIndex();
+		}
+
+		@Override
+		public T previous() {
+			return iter.previous();
+		}
+
+		@Override
+		public int previousIndex() {
+			return iter.previousIndex();
+		}
+
+		@Override
+		public void remove() {
+			
+		}
+
+		@Override
+		public void set(T arg0) {			
+		}
+
+		@Override
+		public void close() {
+			
+		}
+
+		@Override
+		public int getCount() {
+			return count;
+		}
 	}
 }
