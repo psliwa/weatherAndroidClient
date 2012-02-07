@@ -1,7 +1,9 @@
 package pk.ip.weather.android.dao;
 
+import java.util.Iterator;
 import java.util.Set;
 import pk.ip.weather.android.domain.City;
+import pk.ip.weather.android.domain.Graph;
 import pk.ip.weather.android.domain.GraphGrouping;
 import pk.ip.weather.android.domain.GraphType;
 
@@ -14,4 +16,7 @@ public interface Dao {
 	
 	public Set<GraphGrouping> findGraphGroupings();
 	public void saveGraphGroupings(Set<GraphGrouping> groupings);
+	
+	public void saveGraph(Graph graph);
+	public Iterator<Graph> findGraphs();
 }

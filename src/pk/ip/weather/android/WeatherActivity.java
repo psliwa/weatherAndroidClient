@@ -1,23 +1,25 @@
 package pk.ip.weather.android;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import pk.ip.weather.android.api.service.ApiException;
 import pk.ip.weather.android.api.service.ApiService;
 import pk.ip.weather.android.api.service.ApiServiceImpl;
 import pk.ip.weather.android.dao.InMemoryDao;
 import pk.ip.weather.android.domain.City;
+import pk.ip.weather.android.domain.Graph;
 import pk.ip.weather.android.domain.GraphGrouping;
 import pk.ip.weather.android.domain.GraphType;
 import pk.ip.weather.android.service.WeatherService;
@@ -25,6 +27,7 @@ import pk.ip.weather.android.service.WeatherServiceImpl;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -49,14 +52,12 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class WeatherActivity extends Activity implements OnSharedPreferenceChangeListener {
+public class WeatherActivity extends AbstractActivity {
 	
 	private static final String TAG = "WeaterActivity";
 	private static final String DATE_FORMAT = "dd/MM/yyyy";
 	private static final String PREFS_KEY_API_URL = "prefApiUrl";
-	
-	private SharedPreferences prefs;
-	
+
 	private DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 	
 	private Spinner citySpinner;
@@ -65,18 +66,13 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
 	private EditText dateFromInput;
 	private EditText dateToInput;
 	private Button showButton;
-	private ImageView graphContainer;
-	
-	private WeatherService weatherService;
-	private ApiService apiService;
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather);
-        
-        loadPrefs();
+
         viewProcess();
     }
     
@@ -96,21 +92,6 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
     	attachListeners();
     }
     
-    private void loadPrefs() {
-    	prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    	
-		prefs.registerOnSharedPreferenceChangeListener(this);
-    }
-
-	@Override
-	public synchronized void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-		Log.d(TAG, "onSharedPreferenceChanged: "+key);
-		if(key.equals(PREFS_KEY_API_URL)) {
-			apiService = null;
-			weatherService = null;
-		}
-	}
-    
 	private void assignWidgets() {
 		citySpinner = (Spinner) findViewById(R.id.cityInput);
     	typeSpinner = (Spinner) findViewById(R.id.typeInput);
@@ -118,7 +99,6 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
     	dateFromInput = (EditText) findViewById(R.id.dateFromInput);
     	dateToInput = (EditText) findViewById(R.id.dateToInput);
     	showButton = (Button) findViewById(R.id.showButton);
-    	graphContainer = (ImageView) findViewById(R.id.graphContainer);
 	}
 	
 	private void attachDatePicker(final EditText input, final Calendar defaultDate) {
@@ -149,7 +129,6 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
 	
     private <T> void populateSpinner(Spinner spinner, List<T> objects) {
     	ArrayAdapter<T> adapter = new ArrayAdapter<T>(this, android.R.layout.simple_spinner_dropdown_item, objects);
-    	adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
     	spinner.setAdapter(adapter);
     }
     
@@ -177,24 +156,6 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
     	return list;
     }
     
-    private WeatherService getWeatherService() {
-    	if(weatherService == null) {
-    		weatherService = new WeatherServiceImpl(new InMemoryDao(), getApiService());
-    	}
-    	
-    	return weatherService;
-    }
-    
-    private ApiService getApiService() {
-    	if(apiService == null) {
-    		String apiUrl = prefs.getString(PREFS_KEY_API_URL, "");
-    		apiService = new ApiServiceImpl(apiUrl);
-    		Log.d(TAG, "Utworzono obiekt apiService, apiUrl: "+apiUrl);
-    	}
-    	
-    	return apiService;
-    }
-    
     private void attachListeners() {
     	showButton.setOnClickListener(new OnClickListener() {
 			@Override
@@ -207,19 +168,28 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
 					final Date dateFrom = dateFromString(dateFromInput.getText().toString());
 					final Date dateTo = dateFromString(dateToInput.getText().toString());
 					
-					new AsyncTask<String, Integer, Drawable>()
+					new AsyncTask<String, Integer, Graph>()
 					{
 						@Override
-						protected Drawable doInBackground(String... arg0) {
-							Drawable drawable = null;
+						protected Graph doInBackground(String... arg0) {
 							InputStream is = null;
 							try {
-								is = getApiService().getGraphURL(dateFrom, dateTo, city, graphType, graphGrouping).openStream();
-								drawable = Drawable.createFromStream(is, "image");
-							} catch (IOException e) {
+								URL url = getApiService().getGraphURL(dateFrom, dateTo, city, graphType, graphGrouping);
+
+								Graph graph = new Graph();
+								graph.setCity(city);
+								graph.setType(graphType);
+								graph.setGrouping(graphGrouping);
+								graph.setDateFrom(dateFrom);
+								graph.setDateTo(dateTo);
+								graph.setUri(url.toURI());
+								getWeatherApplication().getDao().saveGraph(graph);
+								
+								return graph;
+							} catch (ApiException e) {
 								//TODO: komunikat
 								Log.e(TAG, "Error", e);
-							} catch (ApiException e) {
+							} catch (URISyntaxException e) {
 								//TODO: komunikat
 								Log.e(TAG, "Error", e);
 							} finally {
@@ -233,11 +203,17 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
 								}
 							}
 							
-							return drawable;
+							return null;
 						}
 						
-						protected void onPostExecute(Drawable drawable) {
-							graphContainer.setImageDrawable(drawable);
+						protected void onPostExecute(Graph graph) {
+							if(graph != null) {
+								Intent intent = new Intent(WeatherActivity.this, GraphItemActivity.class).putExtra("graph", graph);
+								Bundle extras = new Bundle();
+								extras.putSerializable("graph", graph);
+								intent.putExtras(extras);
+								startActivity(intent);
+							}
 						}
 						
 					}.execute(new String[0]);
@@ -248,10 +224,6 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
 		});
     }
     
-    private void handleException(Throwable e) {
-    	Toast.makeText(WeatherActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-    }
-    
     private Date dateFromString(String stringDate) {
     	DateFormat format = new SimpleDateFormat(DATE_FORMAT);
     	try {
@@ -259,22 +231,5 @@ public class WeatherActivity extends Activity implements OnSharedPreferenceChang
 		} catch (ParseException e) {
 			throw new ValidationException("Date format is invalid", e);
 		}
-    }
-    
-    public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.menu, menu);
-		
-		MenuItem prefsItem = menu.findItem(R.id.menuPrefs);
-		
-		prefsItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				startActivity(new Intent(WeatherActivity.this, PrefsActivity.class));
-				return false;
-			}
-		});
-    	
-    	return true;
     }
 }

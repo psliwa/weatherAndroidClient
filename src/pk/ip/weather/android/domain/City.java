@@ -1,6 +1,11 @@
 package pk.ip.weather.android.domain;
 
-public class City {
+import java.io.Serializable;
+
+public class City implements Serializable {
+
+	private static final long serialVersionUID = 6002450867307496096L;
+
 	private Long id;
 	private String name;
 	

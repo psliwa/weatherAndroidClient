@@ -5,9 +5,13 @@
     <string name="app_name">WeatherAndroidClient</string>
     <string name="hintDateFrom">Date from</string>
     <string name="hintDateTo">Date to</string>
-    <string name="titleShow">show</string>
+    <string name="titleShow">Show chart</string>
     <string name="titlePrefApiUrl">Api url</string>
     <string name="summaryPrefApiUrl">Url to api of service</string>
     <string name="titlePrefs">Preferences</string>
+    <string name="labelDateFrom">Date from</string>
+    <string name="labelDateTo">Date to</string>
+    <string name="labelType">Type</string>
+    <string name="labelGrouping">Grouping</string>
 
 </resources>

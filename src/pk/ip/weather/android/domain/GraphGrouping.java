@@ -1,6 +1,11 @@
 package pk.ip.weather.android.domain;
 
-public class GraphGrouping {
+import java.io.Serializable;
+
+public class GraphGrouping implements Serializable {
+
+	private static final long serialVersionUID = -3033644724429355081L;
+
 	private String id;
 	private String name;
 	

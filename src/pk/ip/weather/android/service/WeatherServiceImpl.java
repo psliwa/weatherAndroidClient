@@ -13,7 +13,7 @@ public class WeatherServiceImpl implements WeatherService {
 	
 	private Dao dao;
 	private ApiService apiService;
-	
+
 	public WeatherServiceImpl(Dao dao, ApiService apiService) {
 		this.dao = dao;
 		this.apiService = apiService;

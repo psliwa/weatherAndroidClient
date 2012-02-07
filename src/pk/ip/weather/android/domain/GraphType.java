@@ -1,6 +1,11 @@
 package pk.ip.weather.android.domain;
 
-public class GraphType {
+import java.io.Serializable;
+
+public class GraphType implements Serializable {
+
+	private static final long serialVersionUID = -72671323640482544L;
+
 	private String id;
 	private String name;
 	

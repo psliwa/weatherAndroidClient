@@ -18,14 +18,30 @@
 	    android:stretchColumns="0,1"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content">
+	    			
 	    <TableRow
 	        android:layout_width="fill_parent">
+	        <TextView 
+			    android:text="@string/labelDateFrom"
+			    android:layout_width="wrap_content"
+			    android:gravity="right"
+			    android:layout_marginRight="10sp"
+			    android:textSize="16sp"/>
 			<EditText 
 			    android:id="@+id/dateFromInput"
 			    android:layout_width="fill_parent"
 			    android:layout_height="wrap_content"
 			    android:inputType="date"
 			    android:hint="@string/hintDateFrom"/>
+	    </TableRow>
+	    <TableRow
+	        android:layout_width="fill_parent">
+			<TextView 
+			    android:text="@string/labelDateTo"
+			    android:layout_width="wrap_content"
+			    android:gravity="right"
+			    android:layout_marginRight="10sp"
+			    android:textSize="16sp"/>
 			<EditText 
 			    android:id="@+id/dateToInput"
 			    android:layout_width="fill_parent"
@@ -35,11 +51,26 @@
 	    </TableRow>
 	    <TableRow
 	        android:layout_width="fill_parent">
+			<TextView 
+			    android:text="@string/labelType"
+			    android:layout_width="wrap_content"
+			    android:gravity="right"
+			    android:layout_marginRight="10sp"
+			    android:textSize="16sp"/>
 			<Spinner 
 			    android:id="@+id/typeInput"
 	    		android:layout_width="fill_parent"
 	    		android:layout_height="wrap_content"
 			    />
+		</TableRow>
+	    <TableRow
+	        android:layout_width="fill_parent">
+			<TextView 
+			    android:text="@string/labelGrouping"
+			    android:layout_width="wrap_content"
+			    android:gravity="right"
+			    android:layout_marginRight="10sp"
+			    android:textSize="16sp"/>
 			<Spinner 
 			    android:id="@+id/groupInput"
 	    		android:layout_width="fill_parent"
@@ -52,13 +83,6 @@
 	    android:id="@+id/showButton"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
-	    android:text="@string/titleShow"/>  
-	    
-	<ImageView 
-	    android:id="@+id/graphContainer"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:layout_weight="1"
-	    />
+	    android:text="@string/titleShow"/> 
 	
 </LinearLayout>
