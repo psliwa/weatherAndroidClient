@@ -1,12 +1,22 @@
 package pk.ip.weather.android;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import pk.ip.weather.android.domain.Graph;
 import pk.ip.weather.android.util.ExtraIterator;
 import pk.ip.weather.android.widget.ExtraIteratorAdapter;
+import pk.ip.weather.android.widget.GraphBinder;
+import pk.ip.weather.android.widget.ExtraIteratorAdapter.Binder;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
-public class GraphListActivity extends AbstractActivity {
+public class GraphListActivity extends AbstractActivity implements OnItemClickListener {
 	
 	private ListView listView;
 	private ExtraIterator<? extends Object> iter;
@@ -16,6 +26,8 @@ public class GraphListActivity extends AbstractActivity {
 		
 		setContentView(R.layout.graph_list);
 		listView = (ListView) findViewById(R.id.listView);
+
+		listView.setOnItemClickListener(this);
 		
 		initView();
 	}
@@ -26,7 +38,8 @@ public class GraphListActivity extends AbstractActivity {
 		}
 
 		iter = getDao().findGraphs();
-		ListAdapter adapter = new ExtraIteratorAdapter(this, R.layout.graph_list_item, iter);
+		Binder binder = GraphBinder.INSTANCE;
+		ListAdapter adapter = new ExtraIteratorAdapter(this, binder, R.layout.graph_list_item, iter);
 		listView.setAdapter(adapter);
 	}
 	
@@ -42,5 +55,11 @@ public class GraphListActivity extends AbstractActivity {
 		if(iter != null) {
 			iter.close();
 		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		Graph graph = (Graph) listView.getItemAtPosition(position);
+		startActivity(new Intent(GraphListActivity.this, GraphItemActivity.class).putExtra("graph", graph));		
 	}
 }

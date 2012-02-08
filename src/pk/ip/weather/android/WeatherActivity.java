@@ -58,7 +58,7 @@ public class WeatherActivity extends AbstractActivity {
 	private static final String DATE_FORMAT = "dd/MM/yyyy";
 	private static final String PREFS_KEY_API_URL = "prefApiUrl";
 
-	private DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+	public static final DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 	
 	private Spinner citySpinner;
 	private Spinner typeSpinner;

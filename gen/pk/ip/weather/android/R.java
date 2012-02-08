@@ -14,16 +14,22 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int cityInput=0x7f070002;
-        public static final int dateFromInput=0x7f070003;
-        public static final int dateToInput=0x7f070004;
-        public static final int graphContainer=0x7f070000;
-        public static final int groupInput=0x7f070006;
-        public static final int listView=0x7f070001;
-        public static final int menuList=0x7f070009;
-        public static final int menuPrefs=0x7f070008;
-        public static final int showButton=0x7f070007;
-        public static final int typeInput=0x7f070005;
+        public static final int cityInput=0x7f070007;
+        public static final int dateFromInput=0x7f070008;
+        public static final int dateToInput=0x7f070009;
+        public static final int graphContainer=0x7f070001;
+        public static final int groupInput=0x7f07000b;
+        public static final int layout=0x7f070000;
+        public static final int listView=0x7f070002;
+        public static final int menuList=0x7f07000e;
+        public static final int menuPrefs=0x7f07000d;
+        public static final int menuSearch=0x7f07000f;
+        public static final int showButton=0x7f07000c;
+        public static final int textCity=0x7f070003;
+        public static final int textDate=0x7f070004;
+        public static final int textGrouping=0x7f070006;
+        public static final int textType=0x7f070005;
+        public static final int typeInput=0x7f07000a;
     }
     public static final class layout {
         public static final int dialog=0x7f030000;
@@ -48,6 +54,7 @@ public final class R {
         public static final int titleList=0x7f05000c;
         public static final int titlePrefApiUrl=0x7f050005;
         public static final int titlePrefs=0x7f050007;
+        public static final int titleSearch=0x7f05000d;
         public static final int titleShow=0x7f050004;
     }
     public static final class xml {

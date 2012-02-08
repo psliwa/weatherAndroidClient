@@ -52,6 +52,15 @@ public class AbstractActivity extends Activity {
 				return false;
 			}
 		});
+		
+		MenuItem searchItem = menu.findItem(R.id.menuSearch);
+		searchItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				startActivity(new Intent(AbstractActivity.this, WeatherActivity.class));
+				return false;
+			}
+		});
     	
     	return true;
     }

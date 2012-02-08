@@ -11,14 +11,16 @@ import android.widget.TextView;
 
 public class ExtraIteratorAdapter extends BaseAdapter {
 
-	private ExtraIterator<? extends Object> iter;
+	private ExtraIterator<?> iter;
 	private LayoutInflater inflater;
 	private int resource;
+	private Binder binder;
 	
-	public ExtraIteratorAdapter(Context context, int resource, ExtraIterator<? extends Object> iter) {
+	public ExtraIteratorAdapter(Context context, Binder binder, int resource, ExtraIterator<?> iter) {
 		this.iter = iter;
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.resource = resource;
+		this.binder = binder;
 	}
 	
 	@Override
@@ -59,8 +61,18 @@ public class ExtraIteratorAdapter extends BaseAdapter {
 			convertView = inflater.inflate(resource, parent, false);
 		}
 		
-		((TextView) convertView).setText(getItem(position).toString());
+		binder.bindObject(getItem(position), convertView);
 		
 		return convertView;
+	}
+	
+	public static interface Binder {
+		public void bindObject(Object object, View view);
+	}
+	
+	public static class BinderImpl implements Binder {
+		public void bindObject(Object object, View view) {
+			((TextView) view).setText(object.toString());
+		}
 	}
 }
