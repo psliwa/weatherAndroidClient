@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 import pk.ip.weather.android.domain.*;
 
-
 public class ApiServiceImpl implements ApiService {
 
 	private String apiUrl;
@@ -21,7 +20,7 @@ public class ApiServiceImpl implements ApiService {
 	
 	public Set<City> findCities() {
 		Set<City> cities = new HashSet<City>();
-		cities.addAll(Arrays.asList(new City[]{ createCity(1L, "Kraków"), createCity(2L, "Warszawa")  }));
+		cities.addAll(Arrays.asList(new City[]{ createCity(1L, "Kraków"), createCity(2L, "Warszawa"), createCity(3L, "Gdańsk"), createCity(4L, "Katowice")  }));
 		return cities;
 	}
 	
@@ -35,7 +34,7 @@ public class ApiServiceImpl implements ApiService {
 	
 	public Set<GraphType> findGraphTypes() {
 		Set<GraphType> types = new HashSet<GraphType>();
-		types.addAll(Arrays.asList(new GraphType[]{ createGraphType("TEMPERATURE", "Temperature"), createGraphType("PRESSURE", "Pressure")  }));
+		types.addAll(Arrays.asList(new GraphType[]{ createGraphType("TEMPERATURE", "temperature"), createGraphType("PRESSURE", "pressure"), createGraphType("WIND_SPEED", "wind speed"), createGraphType("HUMIDITY", "humidity"), createGraphType("VISIBILITY", "visibility"), createGraphType("FOG", "fog"), createGraphType("RAIN", "rain"), createGraphType("SNOW", "snow"), createGraphType("THUNDER", "thunder")  }));
 		return types;
 	}
 	
@@ -49,7 +48,7 @@ public class ApiServiceImpl implements ApiService {
 	
 	public Set<GraphGrouping> findGraphGroupings() {
 		Set<GraphGrouping> groupings = new HashSet<GraphGrouping>();
-		groupings.addAll(Arrays.asList(new GraphGrouping[]{ createGraphGrouping("YEAR", "Year"), createGraphGrouping("MONTH", "Month"), createGraphGrouping("DAY", "Day") }));
+		groupings.addAll(Arrays.asList(new GraphGrouping[]{ createGraphGrouping("YEAR", "year"), createGraphGrouping("MONTH", "month"), createGraphGrouping("DAY", "day") }));
 		return groupings;
 	}
 	
