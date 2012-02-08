@@ -187,17 +187,17 @@ public class WeatherActivity extends AbstractActivity {
 								
 								return graph;
 							} catch (ApiException e) {
-								//TODO: komunikat
+								handleException(e);
 								Log.e(TAG, "Error", e);
 							} catch (URISyntaxException e) {
-								//TODO: komunikat
+								handleException(e);
 								Log.e(TAG, "Error", e);
 							} finally {
 								if(is != null) {
 									try {
 										is.close();
 									} catch (IOException e) {
-										//TODO: komunikat
+										handleException(e);
 										Log.e(TAG, "Error", e);
 									}
 								}

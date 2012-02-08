@@ -13,6 +13,7 @@ import pk.ip.weather.android.domain.Graph;
 import pk.ip.weather.android.domain.GraphGrouping;
 import pk.ip.weather.android.domain.GraphType;
 import pk.ip.weather.android.util.ExtraIterator;
+import pk.ip.weather.android.util.ReverseExtraIterator;
 
 public class InMemoryDao implements Dao {
 
@@ -59,7 +60,7 @@ public class InMemoryDao implements Dao {
 	
 	@Override
 	public ExtraIterator<Graph> findGraphs() {
-		return new ExtraIteratorImpl(graphs.listIterator(), graphs.size());
+		return new ReverseExtraIterator<Graph>(new ExtraIteratorImpl(graphs.listIterator(), graphs.size()));
 	}
 	
 	private static class ExtraIteratorImpl<T> implements ExtraIterator<T> {

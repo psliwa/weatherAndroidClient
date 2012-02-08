@@ -1,7 +1,5 @@
 package pk.ip.weather.android;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import pk.ip.weather.android.domain.Graph;
 import pk.ip.weather.android.util.ExtraIterator;
 import pk.ip.weather.android.widget.ExtraIteratorAdapter;
@@ -14,7 +12,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class GraphListActivity extends AbstractActivity implements OnItemClickListener {
 	

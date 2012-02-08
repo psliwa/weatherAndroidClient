@@ -65,7 +65,12 @@ public class AbstractActivity extends Activity {
     	return true;
     }
     
-    protected void handleException(Throwable e) {
-    	Toast.makeText(AbstractActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+    protected void handleException(final Throwable e) {
+    	runOnUiThread(new Runnable(){
+			@Override
+			public void run() {
+				Toast.makeText(AbstractActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+			}
+    	});
     }
 }
