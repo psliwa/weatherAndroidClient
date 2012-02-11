@@ -3,11 +3,12 @@ package pk.ip.weather.android;
 import pk.ip.weather.android.api.service.ApiService;
 import pk.ip.weather.android.api.service.ApiServiceImpl;
 import pk.ip.weather.android.dao.Dao;
-import pk.ip.weather.android.dao.HalfInMemoryDao;
+import pk.ip.weather.android.dao.DbDao;
 import pk.ip.weather.android.dao.InMemoryDao;
 import pk.ip.weather.android.service.WeatherService;
 import pk.ip.weather.android.service.WeatherServiceImpl;
 import android.app.Application;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
@@ -23,8 +24,15 @@ public class WeatherApplication extends Application implements OnSharedPreferenc
 	private ApiService apiService;
 	private Dao dao;
 	
+	private static Context context;
+	
 	public void onCreate() {
 		loadPrefs();
+		context = this;
+	}
+	
+	public static Context getContext() {
+		return context;
 	}
 	
     private void loadPrefs() {
@@ -52,7 +60,7 @@ public class WeatherApplication extends Application implements OnSharedPreferenc
     
     public Dao getDao() {
     	if(dao == null) {
-    		dao = new HalfInMemoryDao(this, new InMemoryDao());
+    		dao = new DbDao(this, new InMemoryDao());
     	}
     	
     	return dao;

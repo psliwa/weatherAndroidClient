@@ -1,6 +1,7 @@
 package pk.ip.weather.android;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import pk.ip.weather.android.domain.Graph;
 import pk.ip.weather.android.widget.GraphBinder;
@@ -34,9 +35,15 @@ public class GraphItemActivity extends AbstractActivity {
 		ImageView imageView = (ImageView) findViewById(R.id.graphContainer);
 		
 		try {
-			Log.d(TAG, "uri: "+graph.getUri());
-			Drawable drawable = Drawable.createFromStream(graph.getUri().toURL().openStream(), "image");
-			imageView.setImageDrawable(drawable);
+			InputStream is = null;
+			try {
+				is = graph.openStream();
+				
+				Drawable drawable = Drawable.createFromStream(is, graph.getFilename());
+				imageView.setImageDrawable(drawable);
+			} finally {
+				if(is != null) is.close();
+			}
 		} catch (MalformedURLException e) {
 			handleException(e);
 		} catch (IOException e) {

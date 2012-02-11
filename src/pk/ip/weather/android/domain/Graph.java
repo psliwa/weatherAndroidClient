@@ -1,5 +1,9 @@
 package pk.ip.weather.android.domain;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Date;
@@ -14,7 +18,7 @@ public class Graph implements DomainObject<Long>, Serializable {
 	private GraphType type;
 	private Date dateFrom;
 	private Date dateTo;
-	private URI uri;
+	private String filename;
 
 	public Long getId() {
 		return id;
@@ -54,10 +58,14 @@ public class Graph implements DomainObject<Long>, Serializable {
 		this.dateTo = dateTo;
 	}
 	
-	public URI getUri() {
-		return uri;
+	public String getFilename() {
+		return filename;
 	}
-	public void setUri(URI file) {
-		this.uri = file;
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+	
+	public InputStream openStream() throws IOException {
+		return new FileInputStream(this.filename);
 	}
 }

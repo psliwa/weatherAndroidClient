@@ -1,5 +1,9 @@
 package pk.ip.weather.android.dao;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
@@ -17,6 +21,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import pk.ip.weather.android.WeatherActivity;
+import pk.ip.weather.android.WeatherApplication;
 import pk.ip.weather.android.domain.City;
 import pk.ip.weather.android.domain.DomainObject;
 import pk.ip.weather.android.domain.Graph;
@@ -26,16 +32,18 @@ import pk.ip.weather.android.util.CursorExtraIterator;
 import pk.ip.weather.android.util.CursorExtraIterator.Hydrator;
 import pk.ip.weather.android.util.ExtraIterator;
 
-public class HalfInMemoryDao implements Dao {
+public class DbDao implements Dao {
 
 	private Dao dao;
 	private DbHelper dbHelper;
 	private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	private Context context;
 	
-	public HalfInMemoryDao(Context context, Dao dao) {
+	public DbDao(Context context, Dao dao) {
 		dao.clear();
 		this.dao = dao;		
 		this.dbHelper = new DbHelper(context);
+		this.context = context;
 	}
 	
 	@Override
@@ -67,7 +75,7 @@ public class HalfInMemoryDao implements Dao {
 		return findDomainObjectsInDb(sql, hydrator);
 	}
 	
-	private <T extends DomainObject> Set<T> findDomainObjectsInDb(String sql, Hydrator<T> hydrator) {
+	private <T extends DomainObject<?>> Set<T> findDomainObjectsInDb(String sql, Hydrator<T> hydrator) {
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
 		
 		Cursor cursor = db.rawQuery(sql, null);
@@ -80,7 +88,7 @@ public class HalfInMemoryDao implements Dao {
 		}
 	}
 	
-	private <T extends DomainObject> Set<T> hydrateDomainObjects(Cursor cursor, Hydrator<T> hydrator) {
+	private <T extends DomainObject<?>> Set<T> hydrateDomainObjects(Cursor cursor, Hydrator<T> hydrator) {
 		Set<T> objects = new HashSet<T>();
 		cursor.moveToFirst();
 		while(!cursor.isAfterLast()) {
@@ -109,7 +117,7 @@ public class HalfInMemoryDao implements Dao {
 		saveDomainObjectInDb(cities, DbHelper.TABLE_CITY, mapper);
 	}
 	
-	private <T extends DomainObject> void saveDomainObjectInDb(Set<T> objects, String tableName, Mapper<T> mapper) {
+	private <T extends DomainObject<?>> void saveDomainObjectInDb(Set<T> objects, String tableName, Mapper<T> mapper) {
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
 		
 		try {
@@ -220,7 +228,7 @@ public class HalfInMemoryDao implements Dao {
 	}
 
 	@Override
-	public void saveGraph(Graph graph) {
+	public Graph saveGraph(Graph graph) {
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
 
 		try {
@@ -230,10 +238,12 @@ public class HalfInMemoryDao implements Dao {
 			values.put(DbHelper.C_GROUPING_ID, graph.getGrouping().getId());
 			values.put(DbHelper.C_DATE_FROM, formatDate(graph.getDateFrom()));
 			values.put(DbHelper.C_DATE_TO, formatDate(graph.getDateTo()));
-			values.put(DbHelper.C_FILENAME, graph.getUri().toString());
+			values.put(DbHelper.C_FILENAME, graph.getFilename().toString());
 			
 			Long id = db.insertOrThrow(DbHelper.TABLE_GRAPH, null, values);
 			graph.setId(id);
+			
+			return new LocalGraph(graph, DbDao.this.context);
 		} finally {
 			db.close();
 		}
@@ -251,25 +261,58 @@ public class HalfInMemoryDao implements Dao {
 		Hydrator<Graph> hydrator = new Hydrator<Graph>(){
 			@Override
 			public Graph hydrate(Cursor cursor) {
-				Graph graph = new Graph();
+				Graph graph = new LocalGraph(DbDao.this.context);
 				graph.setId(cursor.getLong(0));
 				graph.setCity(findCityById(cursor.getLong(1)));
 				graph.setType(findGraphTypeById(cursor.getString(2)));
 				graph.setGrouping(findGroupingById(cursor.getString(3)));				
 				graph.setDateFrom(parseDate(cursor.getString(4)));
 				graph.setDateTo(parseDate(cursor.getString(5)));
-
-				try {
-					graph.setUri(new URI(cursor.getString(6)));
-				} catch (URISyntaxException e) {
-					throw new RuntimeException(e);
-				}
+				graph.setFilename(cursor.getString(6));
 
 				return graph;
 			}
 		};
 		
 		return new CursorExtraIterator<Graph>(cursor, hydrator);
+	}
+	
+	private static class LocalGraph extends Graph {
+		
+		private Context context;
+		
+		public LocalGraph(Context context) {
+			this.context = context;
+		}
+		
+		public LocalGraph(Graph graph, Context context) {
+			this(context);
+
+			setId(graph.getId());
+			setCity(graph.getCity());
+			setDateFrom(graph.getDateFrom());
+			setDateTo(graph.getDateTo());
+			setFilename(graph.getFilename());
+			setGrouping(graph.getGrouping());
+			setType(graph.getType());
+		}
+		
+		@Override
+		public InputStream openStream() throws IOException {
+			return this.context.openFileInput(this.getFilename());
+		}
+		
+		private void writeObject(ObjectOutputStream out) throws IOException {
+			Context context = this.context;
+			this.context = null;
+			out.defaultWriteObject();
+			this.context = context;
+		}
+		
+		private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+			in.defaultReadObject();
+			this.context = WeatherApplication.getContext();
+		}
 	}
 	
 	private Date parseDate(String s) {
@@ -325,7 +368,7 @@ public class HalfInMemoryDao implements Dao {
 
 		public DbHelper(Context context) {
 			super(context, DB_NAME, null, DB_VERSION);
-			
+
 			this.context = context;
 		}
 		

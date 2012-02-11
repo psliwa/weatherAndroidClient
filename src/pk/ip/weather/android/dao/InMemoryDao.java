@@ -54,8 +54,9 @@ public class InMemoryDao implements Dao {
 	}
 	
 	@Override
-	public void saveGraph(Graph graph) {
+	public Graph saveGraph(Graph graph) {
 		graphs.add(graph);
+		return graph;
 	}
 	
 	@Override

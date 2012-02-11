@@ -1,10 +1,15 @@
 package pk.ip.weather.android;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -182,14 +187,19 @@ public class WeatherActivity extends AbstractActivity {
 								graph.setGrouping(graphGrouping);
 								graph.setDateFrom(dateFrom);
 								graph.setDateTo(dateTo);
-								graph.setUri(url.toURI());
-								getWeatherApplication().getDao().saveGraph(graph);
+								String filename = writeFile(url);
+								graph.setFilename(filename);
+								
+								graph = getWeatherApplication().getDao().saveGraph(graph);
 								
 								return graph;
 							} catch (ApiException e) {
 								handleException(e);
 								Log.e(TAG, "Error", e);
-							} catch (URISyntaxException e) {
+							} catch (RuntimeException e) {
+								handleException(e);
+								Log.e(TAG, "Error", e);
+							} catch (IOException e) {
 								handleException(e);
 								Log.e(TAG, "Error", e);
 							} finally {
@@ -222,6 +232,43 @@ public class WeatherActivity extends AbstractActivity {
 				}
 			}
 		});
+    }
+    
+    private String writeFile(URL url) throws IOException {
+    	MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+
+		String filename;
+		try {
+			filename = new String(digest.digest(url.toURI().toString().getBytes()));
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+
+		OutputStream os = openFileOutput(filename, MODE_PRIVATE);
+		InputStream is = null;
+    	
+        try {
+    		is = url.openStream();
+
+    		int length = 1024;
+    		byte[] buffer = new byte[length];
+    		int read = 0;
+
+    		while((read = is.read(buffer, 0, length)) != -1) {
+    			os.write(buffer, 0, read);
+    		}
+    		
+    	} finally {
+    		if(is != null) is.close();
+    		if(os != null) os.close();
+    	}
+    	
+    	return filename;
     }
     
     private Date dateFromString(String stringDate) {

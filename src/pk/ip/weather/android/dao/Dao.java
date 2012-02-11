@@ -17,7 +17,7 @@ public interface Dao {
 	public Set<GraphGrouping> findGraphGroupings();
 	public void saveGraphGroupings(Set<GraphGrouping> groupings);
 	
-	public void saveGraph(Graph graph);
+	public Graph saveGraph(Graph graph);
 	public ExtraIterator<Graph> findGraphs();
 	
 	public void close();
