@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import android.content.ContentValues;
@@ -32,39 +33,190 @@ public class HalfInMemoryDao implements Dao {
 	private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public HalfInMemoryDao(Context context, Dao dao) {
-		this.dao = dao;
+		dao.clear();
+		this.dao = dao;		
 		this.dbHelper = new DbHelper(context);
 	}
 	
 	@Override
 	public Set<City> findCities() {
-		return dao.findCities();
+		Set<City> cities = dao.findCities();
+		
+		if(cities.size() == 0) {
+			cities = findCitiesInDb();
+			dao.saveCities(cities);
+		}
+		
+		return cities;
+	}
+	
+	private Set<City> findCitiesInDb() {
+		String sql = "SELECT * FROM "+DbHelper.TABLE_CITY;
+		
+		Hydrator<City> hydrator = new Hydrator<City>(){
+			@Override
+			public City hydrate(Cursor cursor) {
+				City city = new City();
+				city.setId(cursor.getLong(0));
+				city.setName(cursor.getString(1));
+				
+				return city;
+			}			
+		};
+		
+		return findDomainObjectsInDb(sql, hydrator);
+	}
+	
+	private <T extends DomainObject> Set<T> findDomainObjectsInDb(String sql, Hydrator<T> hydrator) {
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
+		
+		Cursor cursor = db.rawQuery(sql, null);
+		
+		try {
+			return hydrateDomainObjects(cursor, hydrator);
+		} finally {
+			cursor.close();
+//			db.close();
+		}
+	}
+	
+	private <T extends DomainObject> Set<T> hydrateDomainObjects(Cursor cursor, Hydrator<T> hydrator) {
+		Set<T> objects = new HashSet<T>();
+		cursor.moveToFirst();
+		while(!cursor.isAfterLast()) {
+			objects.add(hydrator.hydrate(cursor));
+			cursor.moveToNext();
+		}
+		
+		return objects;
 	}
 
 	@Override
 	public void saveCities(Set<City> cities) {
 		dao.saveCities(cities);
+		saveCitiesInDb(cities);
+	}
+	
+	private void saveCitiesInDb(Set<City> cities) {
+		Mapper<City> mapper = new Mapper<City>(){
+
+			@Override
+			public void doMapping(City object, ContentValues values) {
+				values.put(DbHelper.C_ID, object.getId());
+				values.put(DbHelper.C_NAME, object.getName());
+			}
+		};
+		saveDomainObjectInDb(cities, DbHelper.TABLE_CITY, mapper);
+	}
+	
+	private <T extends DomainObject> void saveDomainObjectInDb(Set<T> objects, String tableName, Mapper<T> mapper) {
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
+		
+		try {
+			db.execSQL("DELETE FROM "+tableName);
+			ContentValues values = new ContentValues();
+			for(T object : objects) {
+				values.clear();
+				mapper.doMapping(object, values);
+				db.insertOrThrow(tableName, null, values);
+			}
+		} finally {
+			db.close();
+		}
 	}
 
 	@Override
 	public Set<GraphType> findGraphTypes() {
-		return dao.findGraphTypes();
+		Set<GraphType> types = dao.findGraphTypes();
+		
+		if(types.size() == 0) {
+			types = findGraphTypesInDb();
+			dao.saveGraphTypes(types);
+		}
+		
+		return types;
+	}
+	
+	private Set<GraphType> findGraphTypesInDb() {
+		String sql = "SELECT * FROM "+DbHelper.TABLE_GRAPH_TYPE;
+		
+		Hydrator<GraphType> hydrator = new Hydrator<GraphType>(){
+			@Override
+			public GraphType hydrate(Cursor cursor) {
+				GraphType type = new GraphType();
+				type.setId(cursor.getString(0));
+				type.setName(cursor.getString(1));
+				
+				return type;
+			}			
+		};
+
+		return findDomainObjectsInDb(sql, hydrator);
 	}
 
 	@Override
 	public void saveGraphTypes(Set<GraphType> types) {
 		dao.saveGraphTypes(types);
-		
+		saveGraphTypesInDb(types);
+	}
+	
+	private void saveGraphTypesInDb(Set<GraphType> objects) {
+		Mapper<GraphType> mapper = new Mapper<GraphType>(){
+
+			@Override
+			public void doMapping(GraphType object, ContentValues values) {
+				values.put(DbHelper.C_ID, object.getId());
+				values.put(DbHelper.C_NAME, object.getName());
+			}
+		};
+		saveDomainObjectInDb(objects, DbHelper.TABLE_GRAPH_TYPE, mapper);
 	}
 
 	@Override
 	public Set<GraphGrouping> findGraphGroupings() {
-		return dao.findGraphGroupings();
+		Set<GraphGrouping> groupings = dao.findGraphGroupings();
+		
+		if(groupings.size() == 0) {
+			groupings = findGraphGroupingsInDb();
+			dao.saveGraphGroupings(groupings);
+		}
+		
+		return groupings;
+	}
+	
+	private Set<GraphGrouping> findGraphGroupingsInDb() {
+		String sql = "SELECT * FROM "+DbHelper.TABLE_GRAPH_GROUPING;
+		
+		Hydrator<GraphGrouping> hydrator = new Hydrator<GraphGrouping>(){
+			@Override
+			public GraphGrouping hydrate(Cursor cursor) {
+				GraphGrouping grouping = new GraphGrouping();
+				grouping.setId(cursor.getString(0));
+				grouping.setName(cursor.getString(1));
+				
+				return grouping;
+			}			
+		};
+		
+		return findDomainObjectsInDb(sql, hydrator);
 	}
 
 	@Override
 	public void saveGraphGroupings(Set<GraphGrouping> groupings) {
 		dao.saveGraphGroupings(groupings);
+		saveGraphGroupingsInDb(groupings);
+	}
+	
+	private void saveGraphGroupingsInDb(Set<GraphGrouping> objects) {
+		Mapper<GraphGrouping> mapper = new Mapper<GraphGrouping>(){
+
+			@Override
+			public void doMapping(GraphGrouping object, ContentValues values) {
+				values.put(DbHelper.C_ID, object.getId());
+				values.put(DbHelper.C_NAME, object.getName());
+			}
+		};
+		saveDomainObjectInDb(objects, DbHelper.TABLE_GRAPH_GROUPING, mapper);
 	}
 
 	@Override
@@ -156,7 +308,12 @@ public class HalfInMemoryDao implements Dao {
 		final static Integer DB_VERSION = 1;
 		
 		final static String TABLE_GRAPH = "graph";
+		final static String TABLE_CITY = "city";
+		final static String TABLE_GRAPH_TYPE = "graph_type";
+		final static String TABLE_GRAPH_GROUPING = "graph_grouping";
+		
 		final static String C_ID = BaseColumns._ID;
+		final static String C_NAME = "name";
 		final static String C_CITY_ID = "cityId";
 		final static String C_TYPE_ID = "typeId";
 		final static String C_GROUPING_ID = "groupingId";
@@ -174,22 +331,39 @@ public class HalfInMemoryDao implements Dao {
 		
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			String sql = "CREATE TABLE "+TABLE_GRAPH+"("+
-						C_ID+" INT PRIMARY KEY, " +
-						C_CITY_ID+" int not null, "+
-						C_TYPE_ID+" varchar(64) not null, "+
-						C_GROUPING_ID+" varchar(64) not null, "+
-						C_DATE_FROM+" date not null, "+
-						C_DATE_TO+" date not null, " +
-						C_FILENAME+" varchar(255) not null)";
-			db.execSQL(sql);
-			
-			Log.d(TAG, "Wykonano zapytanie: "+sql);
+			String[] queries = { 
+					"CREATE TABLE "+TABLE_GRAPH+"("+
+					C_ID+" INT PRIMARY KEY, " +
+					C_CITY_ID+" int not null, "+
+					C_TYPE_ID+" varchar(64) not null, "+
+					C_GROUPING_ID+" varchar(64) not null, "+
+					C_DATE_FROM+" date not null, "+
+					C_DATE_TO+" date not null, " +
+					C_FILENAME+" varchar(255) not null);",
+					"CREATE TABLE "+TABLE_CITY+"("+
+					C_ID+" INT PRIMARY KEY, "+
+					C_NAME+" VARCHAR(64) NOT NULL);",
+					"CREATE TABLE "+TABLE_GRAPH_TYPE+"("+
+					C_ID+" VARCHAR(32) PRIMARY KEY,"+
+					C_NAME+" VARCHAR(32) NOT NULL);",
+					"CREATE TABLE "+TABLE_GRAPH_GROUPING+"("+
+					C_ID+" VARCHAR(32) PRIMARY KEY,"+
+					C_NAME+" VARCHAR(32) NOT NULL);"
+			};
+
+			for(String query : queries) {
+				db.execSQL(query);
+				
+				Log.d(TAG, "Wykonano zapytanie: "+query);
+			}
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			db.execSQL("DROP TABLE IF EXISTS "+TABLE_GRAPH);
+			db.execSQL("DROP TABLE IF EXISTS "+TABLE_CITY);
+			db.execSQL("DROP TABLE IF EXISTS "+TABLE_GRAPH_TYPE);
+			db.execSQL("DROP TABLE IF EXISTS "+TABLE_GRAPH_GROUPING);
 			onCreate(db);
 		}
 	}
