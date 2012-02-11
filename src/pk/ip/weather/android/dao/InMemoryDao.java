@@ -61,7 +61,7 @@ public class InMemoryDao implements Dao {
 	
 	@Override
 	public ExtraIterator<Graph> findGraphs() {
-		return new ReverseExtraIterator<Graph>(new ExtraIteratorImpl(graphs.listIterator(), graphs.size()));
+		return new ReverseExtraIterator<Graph>(new ExtraIteratorImpl<Graph>(graphs.listIterator(), graphs.size()));
 	}
 	
 	private static class ExtraIteratorImpl<T> implements ExtraIterator<T> {

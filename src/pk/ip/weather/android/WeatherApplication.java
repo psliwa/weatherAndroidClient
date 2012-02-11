@@ -5,8 +5,10 @@ import pk.ip.weather.android.api.service.ApiServiceImpl;
 import pk.ip.weather.android.dao.Dao;
 import pk.ip.weather.android.dao.DbDao;
 import pk.ip.weather.android.dao.InMemoryDao;
+import pk.ip.weather.android.domain.Graph;
 import pk.ip.weather.android.service.WeatherService;
 import pk.ip.weather.android.service.WeatherServiceImpl;
+import pk.ip.weather.android.util.ExtraIterator;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -85,6 +87,14 @@ public class WeatherApplication extends Application implements OnSharedPreferenc
     }
 	
 	public void clearDao() {
+		ExtraIterator<Graph> graphs = getDao().findGraphs();
+		while(graphs.hasNext()) {
+			Graph graph = graphs.next();
+			boolean result = deleteFile(graph.getFilename());
+			
+			Log.d(TAG, "próba usunięcia pliku "+graph.getFilename()+": "+result);
+		}
+		
 		getDao().clear();
 	}
 }

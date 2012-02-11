@@ -21,19 +21,22 @@ public class CursorExtraIterator<T> implements ExtraIterator<T> {
 
 	@Override
 	public boolean hasNext() {
-		return !cursor.isAfterLast();
+		return cursor.getPosition() < (cursor.getCount() - 1);
+//		return !cursor.isAfterLast();
 	}
 
 	@Override
 	public boolean hasPrevious() {
-		return !cursor.isBeforeFirst();
+		return cursor.getPosition() >= 0;
+//		return !cursor.isBeforeFirst();
 	}
 
 	@Override
 	public T next() {
 		cursor.moveToNext();
+		T object = hydrator.hydrate(cursor);
 		
-		return hydrator.hydrate(cursor);
+		return object;
 	}
 
 	@Override
