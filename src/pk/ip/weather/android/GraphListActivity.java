@@ -7,6 +7,7 @@ import pk.ip.weather.android.widget.GraphBinder;
 import pk.ip.weather.android.widget.ExtraIteratorAdapter.Binder;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -14,6 +15,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 public class GraphListActivity extends AbstractActivity implements OnItemClickListener {
+	
+	private static final String TAG = GraphListActivity.class.getSimpleName();
 	
 	private ListView listView;
 	private ExtraIterator<? extends Object> iter;
@@ -30,19 +33,40 @@ public class GraphListActivity extends AbstractActivity implements OnItemClickLi
 	}
 	
 	private void initView() {
-		if(iter != null) {
-			iter.close();
-		}
+		closeIter();
 
 		iter = getDao().findGraphs();
+//		cur
 		Binder binder = GraphBinder.INSTANCE;
 		ListAdapter adapter = new ExtraIteratorAdapter(this, binder, R.layout.graph_list_item, iter);
 		listView.setAdapter(adapter);
 	}
 	
-	public void onResume(Bundle savedInstanceState) {
+	private void closeIter() {
+		if(iter != null) {
+			iter.close();
+			iter = null;
+		}
+		
+		Log.d(TAG, "closeIter");
+	}
+	
+	@Override
+	public void onResume() {
 		super.onResume();
 		initView();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		closeIter();
+	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		closeIter();
 	}
 	
 	@Override

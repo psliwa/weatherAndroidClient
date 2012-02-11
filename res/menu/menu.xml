@@ -3,6 +3,7 @@
     <item android:id="@+id/menuPrefs" android:title="@string/titlePrefs" android:icon="@android:drawable/ic_menu_preferences"></item>
     <item android:id="@+id/menuList" android:title="@string/titleList"></item>
     <item android:id="@+id/menuSearch" android:title="@string/titleSearch"></item>
+    <item android:id="@+id/menuClear" android:title="@string/titleClear"></item>
     
 
 </menu>

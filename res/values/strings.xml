@@ -15,5 +15,6 @@
     <string name="labelGrouping">Grouping</string>
     <string name="titleList">List</string>
     <string name="titleSearch">Search</string>
+    <string name="titleClear">Clear</string>
 
 </resources>

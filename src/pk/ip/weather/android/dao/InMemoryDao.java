@@ -127,4 +127,15 @@ public class InMemoryDao implements Dao {
 			return count;
 		}
 	}
+	
+	public void close() {
+		
+	}
+	
+	public void clear() {
+		cities.clear();
+		graphTypes.clear();
+		graphGroupings.clear();
+		graphs.clear();
+	}
 }

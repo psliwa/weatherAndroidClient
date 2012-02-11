@@ -7,10 +7,13 @@ import pk.ip.weather.android.widget.GraphBinder;
 import pk.ip.weather.android.widget.ExtraIteratorAdapter.Binder;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
 public class GraphItemActivity extends AbstractActivity {
+	private static String TAG = GraphItemActivity.class.getSimpleName();
+	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
@@ -31,6 +34,7 @@ public class GraphItemActivity extends AbstractActivity {
 		ImageView imageView = (ImageView) findViewById(R.id.graphContainer);
 		
 		try {
+			Log.d(TAG, "uri: "+graph.getUri());
 			Drawable drawable = Drawable.createFromStream(graph.getUri().toURL().openStream(), "image");
 			imageView.setImageDrawable(drawable);
 		} catch (MalformedURLException e) {

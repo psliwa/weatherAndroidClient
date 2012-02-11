@@ -3,6 +3,7 @@ package pk.ip.weather.android;
 import pk.ip.weather.android.api.service.ApiService;
 import pk.ip.weather.android.api.service.ApiServiceImpl;
 import pk.ip.weather.android.dao.Dao;
+import pk.ip.weather.android.dao.HalfInMemoryDao;
 import pk.ip.weather.android.dao.InMemoryDao;
 import pk.ip.weather.android.service.WeatherService;
 import pk.ip.weather.android.service.WeatherServiceImpl;
@@ -51,13 +52,21 @@ public class WeatherApplication extends Application implements OnSharedPreferenc
     
     public Dao getDao() {
     	if(dao == null) {
-    		dao = new InMemoryDao();
+    		dao = new HalfInMemoryDao(this, new InMemoryDao());
     	}
     	
     	return dao;
     }
     
-    public ApiService getApiService() {
+    @Override
+	public void onTerminate() {
+		super.onTerminate();
+		
+		dao.close();
+		dao = null;
+	}
+
+	public ApiService getApiService() {
     	if(apiService == null) {
     		String apiUrl = preferences.getString(PREFS_KEY_API_URL, "");
     		apiService = new ApiServiceImpl(apiUrl);
@@ -66,4 +75,8 @@ public class WeatherApplication extends Application implements OnSharedPreferenc
     	
     	return apiService;
     }
+	
+	public void clearDao() {
+		getDao().clear();
+	}
 }

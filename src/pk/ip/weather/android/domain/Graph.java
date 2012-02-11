@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Date;
 
-public class Graph implements Serializable {
+public class Graph implements DomainObject<Long>, Serializable {
 
 	private static final long serialVersionUID = -3207554572057505032L;
 

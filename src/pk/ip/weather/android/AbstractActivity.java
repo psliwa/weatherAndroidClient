@@ -61,6 +61,16 @@ public class AbstractActivity extends Activity {
 				return false;
 			}
 		});
+		
+		MenuItem clearItem = menu.findItem(R.id.menuClear);
+		clearItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				getWeatherApplication().clearDao();
+				startActivity(new Intent(AbstractActivity.this, WeatherActivity.class));
+				return false;
+			}
+		});
     	
     	return true;
     }

@@ -19,4 +19,8 @@ public interface Dao {
 	
 	public void saveGraph(Graph graph);
 	public ExtraIterator<Graph> findGraphs();
+	
+	public void close();
+	
+	public void clear();
 }

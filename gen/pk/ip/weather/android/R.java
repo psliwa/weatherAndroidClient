@@ -21,6 +21,7 @@ public final class R {
         public static final int groupInput=0x7f07000b;
         public static final int layout=0x7f070000;
         public static final int listView=0x7f070002;
+        public static final int menuClear=0x7f070010;
         public static final int menuList=0x7f07000e;
         public static final int menuPrefs=0x7f07000d;
         public static final int menuSearch=0x7f07000f;
@@ -51,6 +52,7 @@ public final class R {
         public static final int labelGrouping=0x7f05000b;
         public static final int labelType=0x7f05000a;
         public static final int summaryPrefApiUrl=0x7f050006;
+        public static final int titleClear=0x7f05000e;
         public static final int titleList=0x7f05000c;
         public static final int titlePrefApiUrl=0x7f050005;
         public static final int titlePrefs=0x7f050007;
